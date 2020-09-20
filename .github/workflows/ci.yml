@@ -3,6 +3,9 @@ on:
   pull_request:
     branches:
     - master
+  push:
+    branches:
+    - master
 
 jobs:
 
@@ -37,17 +40,12 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      max-parallel: 4
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        go-version: [1.14, 1.15]
+    runs-on: ubuntu-latest
     steps:
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: go-version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Checkout
@@ -59,37 +57,17 @@ jobs:
     - name: Run unit tests
       run: make test
 
-  integration-tests:
-    name: Integration Tests
+  publish:
+    name: Publish Docker image
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:9.5
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-        - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-    - name: Set up Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.15
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install Postgres client
-      run: sudo apt-get install -y postgresql-client
-    - name: Run integration tests
-      run: make integration-test
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PGHOST: 127.0.0.1
-        PGPASSWORD: postgres
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: sassospicco/miniflux/miniflux
+          tag_with_ref: true
