@@ -8,7 +8,7 @@
                         <img src="{{ route "icon" "iconID" .Icon.IconID }}" width="16" height="16" loading="lazy" alt="{{ .Title }}">
                     {{ end }}
                     {{ if .Disabled }} 🚫 {{ end }}
-                    <a href="{{ route "feedEntries" "feedID" .ID }}">{{ .Title }}</a>
+                    <a href="{{ route "feedEntriesAll" "feedID" .ID }}">{{ .Title }}</a>
                 </span>
                 <span class="feed-entries-counter">
                     (<span title="{{ t "page.feeds.unread_counter" }}">{{ .UnreadCount }}</span>/<span title="{{ t "page.feeds.read_counter" }}">{{ .ReadCount }}</span>)
