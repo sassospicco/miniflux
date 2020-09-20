@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sort"
 
 	"miniflux.app/model"
 	"miniflux.app/timezone"
@@ -274,6 +275,8 @@ func (s *Storage) fetchFeeds(feedQuery, counterQuery string, args ...interface{}
 		feed.Category.UserID = feed.UserID
 		feeds = append(feeds, &feed)
 	}
+
+	sort.Sort(feeds)
 
 	return feeds, nil
 }

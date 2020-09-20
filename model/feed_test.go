@@ -7,6 +7,7 @@ package model // import "miniflux.app/model"
 import (
 	"fmt"
 	"os"
+	"sort"
 	"testing"
 	"time"
 
@@ -180,5 +181,63 @@ func TestFeedScheduleNextCheckEntryCountBasedMinInterval(t *testing.T) {
 
 	if feed.NextCheckAt.Before(time.Now().Add(time.Minute * time.Duration(minInterval))) {
 		t.Error(`The next_check_at should not be before the now + min interval`)
+	}
+}
+
+func TestFeedsSortingTitle(t *testing.T) {
+	feed1 := &Feed{
+		ID:    1,
+		Title: "Alpha",
+	}
+
+	feed2 := &Feed{
+		ID:    1,
+		Title: "Bravo",
+	}
+
+	feeds := Feeds{
+		feed1,
+		feed2,
+	}
+
+	sort.Sort(feeds)
+
+	if feeds[0].ID != feed1.ID {
+		t.Error(`Feeds with equal UnreadCount should be sorted alphabetically`)
+	}
+}
+
+func TestFeedsSortingUnread(t *testing.T) {
+	feed1 := &Feed{
+		ID:          1,
+		Title:       "Alpha",
+		UnreadCount: 2,
+	}
+
+	feed2 := &Feed{
+		ID:          1,
+		Title:       "Bravo",
+		UnreadCount: 5,
+	}
+
+	feed3 := &Feed{
+		ID:          1,
+		Title:       "Charlie",
+		UnreadCount: 2,
+	}
+
+	feeds := Feeds{
+		feed1,
+		feed2,
+		feed3,
+	}
+
+	sort.Sort(feeds)
+
+	if feeds[0].ID != feed2.ID {
+		t.Error(`Feeds with different UnreadCount should be sorted by descending UnreadCount`)
+	}
+	if feeds[1].ID != feed1.ID {
+		t.Error(`Feeds with equal UnreadCount should be sorted alphabetically`)
 	}
 }

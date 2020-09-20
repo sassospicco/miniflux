@@ -123,3 +123,18 @@ func (f *Feed) ScheduleNextCheck(weeklyCount int) {
 
 // Feeds is a list of feed
 type Feeds []*Feed
+
+func (s Feeds) Len() int {
+	return len(s)
+}
+
+func (s Feeds) Less(i, j int) bool {
+	if s[i].UnreadCount != s[j].UnreadCount {
+		return s[i].UnreadCount > s[j].UnreadCount
+	}
+	return s[i].Title < s[j].Title
+}
+
+func (s Feeds) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
