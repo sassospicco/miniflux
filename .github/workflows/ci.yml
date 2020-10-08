@@ -4,10 +4,7 @@ on:
     branches:
     - master
   push:
-    branches:
-    - master
   workflow_dispatch:
-      
 
 jobs:
 
@@ -63,13 +60,24 @@ jobs:
     name: Publish Docker image
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      -
+        name: Checkout code
         uses: actions/checkout@v2
-      - name: Push to GitHub Packages
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+      -
+        name: Build and push to GitHub Packages
         uses: docker/build-push-action@v2
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: sassospicco/miniflux/miniflux
-          tag_with_ref: true
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/sassospicco/miniflux:latest
